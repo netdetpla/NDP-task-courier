@@ -54,7 +54,7 @@ func main() {
 		log.Error(err.Error())
 		return
 	}
-	id, err := strconv.Atoi(string(b))
+	id, err := strconv.Atoi(string(b[:len(b) - 1]))
 	if err != nil {
 		log.Error(err.Error())
 		return
