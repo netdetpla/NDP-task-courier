@@ -11,11 +11,12 @@ import (
 )
 
 type task struct {
-	ImageName string   `json:"image-name"`
-	Tag       string   `json:"tag"`
-	TaskName  string   `json:"task-name"`
-	Priority  string   `json:"priority"`
-	Params    []string `json:"params[]"`
+	ImageName string
+	Tag       string
+	TaskName  string
+	Priority  string
+	Ports     string
+	IPs       string
 }
 
 type database struct {
@@ -54,13 +55,13 @@ func main() {
 		log.Error(err.Error())
 		return
 	}
-	id, err := strconv.Atoi(string(b[:len(b) - 1]))
+	id, err := strconv.Atoi(string(b[:len(b)-1]))
 	if err != nil {
 		log.Error(err.Error())
 		return
 	}
 	idStr := strconv.Itoa(LoadIP(id))
-	err = ioutil.WriteFile(GetAppPath() + "scanservice.txt", []byte(idStr), 0644)
+	err = ioutil.WriteFile(GetAppPath()+"scanservice.txt", []byte(idStr), 0644)
 	if err != nil {
 		log.Error(err.Error())
 	}

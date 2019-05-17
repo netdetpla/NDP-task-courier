@@ -1,22 +1,27 @@
 package main
 
 import (
-	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
-func PostTask(taskJson []byte) {
-	log.Info("Post: " + string(taskJson))
-	res, err := http.Post(
+func PostTask(taskInfo task) {
+	//log.Info("Post: " + string(taskInfo))
+	res, err := http.PostForm(
 		"http://10.0.21.229:8080/task/",
-		"multipart/form-data",
-		bytes.NewBuffer(taskJson),
+		url.Values{
+			"image-name": {taskInfo.ImageName},
+			"tag": {taskInfo.Tag},
+			"task-name": {taskInfo.TaskName},
+			"priority": {taskInfo.Priority},
+			"params[]": {taskInfo.IPs, taskInfo.Ports},
+		},
 	)
 	if err != nil {
 		log.Error(err.Error())
@@ -88,6 +93,7 @@ func LoadIP(id int) (ipID int) {
 	i.ImageName = "scanservice"
 	i.Tag = "1.0.3"
 	i.Priority = "5"
+	i.Ports = "21,22,23,25,53,80,110,161,443,8080,3306,1433"
 	var ip string
 	var ipList string
 	for rows.Next() {
@@ -99,14 +105,9 @@ func LoadIP(id int) (ipID int) {
 		count++
 		if count >= 100 {
 			i.TaskName = "task-courier-" + strconv.Itoa(nameCount)
-			i.Params = append(i.Params, ipList, "21,22,23,25,53,80,110,161,443,8080,3306,1433")
-			taskJson, err := json.Marshal(i)
-			if err != nil {
-				log.Error(err.Error())
-				return
-			}
-			PostTask(taskJson)
-			i.Params = []string{}
+			i.IPs = ipList
+			PostTask(*i)
+			i.IPs = ""
 			count = 0
 			nameCount++
 		}
