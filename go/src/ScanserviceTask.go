@@ -11,13 +11,13 @@ import (
 	"strconv"
 )
 
-func PostTask(taskJson []byte)  {
+func PostTask(taskJson []byte) {
 	log.Info("Post: " + string(taskJson))
 	res, err := http.Post(
 		"http://10.0.21.229:8080/task/",
 		"application/json;charset=utf-8",
 		bytes.NewBuffer(taskJson),
-		)
+	)
 	if err != nil {
 		log.Error(err.Error())
 		return
@@ -33,11 +33,11 @@ func PostTask(taskJson []byte)  {
 		}
 	}()
 	content, err := ioutil.ReadAll(res.Body)
-    if err != nil {
-        log.Error(err.Error())
-        return
-    }
-    log.Info(string(content))
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+	log.Info(string(content))
 }
 func LoadIP(id int) (ipID int) {
 	ipID = id
@@ -83,6 +83,7 @@ func LoadIP(id int) (ipID int) {
 		return
 	}
 	count := 0
+	nameCount := 0
 	i := new(task)
 	i.ImageName = "scanservice"
 	i.Tag = "1.0.3"
@@ -95,8 +96,9 @@ func LoadIP(id int) (ipID int) {
 			return
 		}
 		ipList = ipList + ip + ","
-		if count%100 == 99 {
-			i.TaskName = "task-courier-" + strconv.Itoa(count/100)
+		count++
+		if count >= 100 {
+			i.TaskName = "task-courier-" + strconv.Itoa(nameCount)
 			i.Params = append(i.Params, ipList, "21,22,23,25,53,80,110,161,443,8080,3306,1433")
 			taskJson, err := json.Marshal(i)
 			if err != nil {
@@ -105,8 +107,9 @@ func LoadIP(id int) (ipID int) {
 			}
 			PostTask(taskJson)
 			i.Params = []string{}
+			count = 0
+			nameCount++
 		}
-		count++
 	}
 	err = rows.Close()
 	if err != nil {
