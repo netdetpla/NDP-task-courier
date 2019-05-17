@@ -15,7 +15,7 @@ func PostTask(taskJson []byte) {
 	log.Info("Post: " + string(taskJson))
 	res, err := http.Post(
 		"http://10.0.21.229:8080/task/",
-		"application/json;charset=utf-8",
+		"multipart/form-data",
 		bytes.NewBuffer(taskJson),
 	)
 	if err != nil {
